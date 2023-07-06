@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function SmallPollCard(props) {
-  const { poll } = props;
-
+export default function SmallPollCard({ poll }) {
   return (
     <div class="card">
       <div class="card-details">

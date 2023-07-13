@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function CreatePollPage() {
   const navigate = useNavigate();
-  const [poll, setPoll] = useState(null);
+  const topics = [
+    "Arts",
+    "Business",
+    "Education",
+    "Entertainment",
+    "Food",
+    "Health",
+    "Lifestyle",
+    "Personal",
+    "Politics",
+    "Science",
+    "Social",
+    "Sports",
+    "Technology",
+    "Travel",
+    "Other",
+  ];
 
   const [form, setForm] = useState({
     user: "",
@@ -14,59 +31,13 @@ export default function CreatePollPage() {
     question: "",
     description: "",
     votes: {
-      type: "",
       option1: {},
       option2: {},
     },
-    expiresOn: "",
   });
 
-  const [optionCount, setOptionCount] = useState(2);
-
-  function handleAddOption() {
-    setOptionCount((prevCount) => prevCount + 1);
-  }
-
-  useEffect(() => {
-    async function fetchPolls() {
-      const response = await axios.get("https://webdev103.cyclic.app/GoPolly");
-      const pollData = response.data[0];
-      setPoll(pollData);
-      setForm((prevForm) => ({
-        ...prevForm,
-        topics: pollData.topics,
-      }));
-    }
-    fetchPolls();
-  }, []);
-
-  function handleChange(event) {
-    const { name, value } = event.target;
-    if (name === "votes.type") {
-      let options = {
-        option1: { option: "" },
-        option2: { option: "" },
-      };
-      if (value === "Multiple Choice") {
-        options = {
-          ...options,
-          option3: { option: "" },
-        };
-      }
-      setForm((prevForm) => ({
-        ...prevForm,
-        votes: {
-          ...prevForm.votes,
-          type: [value],
-          ...options,
-        },
-      }));
-    } else {
-      setForm((prevForm) => ({
-        ...prevForm,
-        [name]: value,
-      }));
-    }
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
@@ -82,21 +53,13 @@ export default function CreatePollPage() {
         question: "",
         description: "",
         votes: {
-          type: "",
           option1: {},
           option2: {},
         },
-        expiresOn: "",
       });
-      toast.success("Poll submitted!");
-      navigate("/");
     } catch (error) {
       console.log(error);
     }
-  }
-
-  if (!poll) {
-    return <p>Loading poll data...</p>;
   }
 
   return (
@@ -121,13 +84,18 @@ export default function CreatePollPage() {
         </div>
       </section>
       <section>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mx-auto max-w-5xl py-24 sm:px-6 sm:py-12 lg:px-8 shadow-2xl sm:rounded-3xl">
+          <h2 className= "mx-auto max-w-7xl px-6 lg:px-8 text-lg leading-8 text-gray-900 lg:text-center">
+            Please fill out the form below and click on "submit" when you're
+            ready to submit your poll. For now, only binary voting polls are
+            available, but new voting styles will be incorporated soon!
+          </h2>
           <form
             onSubmit={handleSubmit}
-            className="border m-4 p-5 rounded w-full shadow-md"
+            className="border m-4 p-5 rounded w-full shadow-md bg-gray-900"
           >
             <div className="flex flex-col mb-4">
-              <label className="mb-1">Created by</label>
+              <label className="mb-1 mb-2 text-gray-100">Created by</label>
               <input
                 type="text"
                 name="user"
@@ -137,16 +105,17 @@ export default function CreatePollPage() {
                 className="p-2 border focus:outline-none resize-none"
               />
             </div>
+
             <div className="flex flex-col mb-4">
-              <label className="mb-1">Topic</label>
-              {poll.topics && poll.topics.length > 0 ? (
+              <label className="mb-2 text-gray-100">Topic</label>
+              {topics.length > 0 ? (
                 <select
                   name="topics"
                   value={form.topics}
                   onChange={handleChange}
                   className="p-2 border focus:outline-none resize-none"
                 >
-                  {poll.topics.map((topic, index) => (
+                  {topics.map((topic, index) => (
                     <option key={index} value={topic}>
                       {topic}
                     </option>
@@ -156,8 +125,9 @@ export default function CreatePollPage() {
                 <p>No topics available</p>
               )}
             </div>
+
             <div className="flex flex-col mb-4">
-              <label className="mb-1">Question</label>
+              <label className="mb-1 mb-2 text-gray-100">Question</label>
               <input
                 type="text"
                 name="question"
@@ -167,85 +137,54 @@ export default function CreatePollPage() {
                 className="p-2 border focus:outline-none resize-none"
               />
             </div>
+
             <div className="flex flex-col mb-4">
-              <label className="mb-1">Description</label>
+              <label className="mb-1 mb-2 text-gray-100">Description</label>
               <textarea
                 type="text"
                 name="description"
                 value={form.description}
                 onChange={handleChange}
                 placeholder="Give your voters some context ..."
-                className="border w-full p-2 focus:outline-none resize-none"
+                className="border w-full p-2 focus:outline-none resize-vertical"
               />
             </div>
-            <div className="flex flex-col mb-4">
-              <label className="mb-1">Voting type</label>
-              <select
-                name="votes.type"
-                value={form.votes.type}
-                onChange={handleChange}
-                className="p-2 border focus:outline-none resize-none"
-              >
-                <option value="Binary">Binary</option>
-                <option value="Multiple Choice">Multiple Choice</option>
-              </select>
-            </div>
-            {form.votes.type.length > 0 && form.votes.type[0] === "Binary" && (
-              <div className="flex flex-col mb-4">
-                <label className="mb-1">Option 1</label>
-                <input
-                  type="text"
-                  name="option1"
-                  value={form.votes.option1.option || ""}
-                  onChange={handleChange}
-                  className="p-2 border focus:outline-none resize-none"
-                />
-                <label className="mb-1">Option 2</label>
-                <input
-                  type="text"
-                  name="option2"
-                  value={form.votes.option2.option || ""}
-                  onChange={handleChange}
-                  className="p-2 border focus:outline-none resize-none"
-                />
-              </div>
-            )}
 
-            {form.votes.type[0] === "Multiple Choice" && (
-              <div>
-                {Array.from({ length: optionCount }, (_, index) => {
-                  const optionKey = `option${index + 1}`;
-                  return (
-                    <div className="flex flex-col mb-4" key={index}>
-                      <label className="mb-1">{`Option ${index + 1}`}</label>
-                      <input
-                        type="text"
-                        name={`votes.${optionKey}.option`}
-                        value={form.votes[optionKey]?.option || ""}
-                        onChange={handleChange}
-                        className="p-2 border-none focus:outline-none resize-none"
-                      />
-                    </div>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={handleAddOption}
-                  className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
-                >
-                  Add Option
-                </button>
-              </div>
-            )}
+            <div className="flex flex-col mb-4">
+              <label className="mb-1 mb-2 text-gray-100">Option 1</label>
+              <input
+                type="text"
+                name="votes.option1.option"
+                value={form.votes.option1.option}
+                onChange={handleChange}
+                placeholder="Enter Option 1"
+                className="p-2 border focus:outline-none resize-none"
+              />
+            </div>
+
+            <div className="flex flex-col mb-4">
+              <label className="mb-1 mb-2 text-gray-100">Option 2</label>
+              <input
+                type="text"
+                name="votes.option2.option"
+                value={form.votes.option2.option}
+                onChange={handleChange}
+                placeholder="Enter Option 2"
+                className="p-2 border focus:outline-none resize-none"
+              />
+            </div>
 
             <button
               type="submit"
-              className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               Submit
             </button>
           </form>
         </div>
+      </section>
+      <section className="mt-40">
+        <Footer />
       </section>
     </div>
   );

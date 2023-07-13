@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import SmallPollCard from "../components/SmallPollCard";
+import PollCard from "../components/PollCard";
 
 export default function OpenPollsPage() {
   const [polls, setPolls] = useState([]);
@@ -11,19 +11,22 @@ export default function OpenPollsPage() {
   useEffect(() => {
     async function fetchPolls() {
       try {
-        const response = await axios.get("");
+        const response = await axios.get(
+          "https://webdev103.cyclic.app/GoPolly"
+        );
         setPolls(response.data);
       } catch (error) {
         console.log(error);
       }
     }
     fetchPolls();
+    console.log(polls);
   }, []);
-
+  
   return (
     <div>
       <Navbar />
-      <section style={{ height: "600px" }}>
+      <section style={{ height: "400px" }}>
         <div className="bg-white pt-24 pb-12 sm:pt-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:text-center">
@@ -53,9 +56,9 @@ export default function OpenPollsPage() {
           </div>
         </div>
       </section>
-      <section>
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
         {polls.map((poll) => {
-          <SmallPollCard key={poll._id} poll={poll} />;
+          return <PollCard key={poll._id} poll={poll} />;
         })}
       </section>
       <Footer />
